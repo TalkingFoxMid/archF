@@ -15,6 +15,8 @@ trait PacmanApi[F[_]] {
   def packageList: F[Set[String]]
 
   def getDependencies(packageF: String): F[Set[String]]
+
+  def getCodependencies(packageF: String): F[Set[String]]
 }
 
 class PacmanApiImpl[F[_]: Sync](implicit shellAccessor: ShellAccessor[F]) extends PacmanApi[F] {

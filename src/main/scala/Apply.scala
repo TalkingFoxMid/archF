@@ -4,6 +4,7 @@ import cats.syntax.traverse._
 import insfrastructure.ShellAccessor
 
 import scala.sys.process._
+
 object Apply extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     for {
