@@ -1,8 +1,9 @@
 package Funcman
-
+import PackagesOps._
 import cats.syntax.traverse._
 import cats.syntax.flatMap._
 import cats.syntax.applicative._
+
 import cats.{Applicative, Functor}
 import cats.effect.{IO, Sync}
 import insfrastructure.ShellAccessor
@@ -12,6 +13,8 @@ import scala.sys.process._
 
 trait PacmanApi[F[_]] {
   def packageList: F[Set[String]]
+
+  def getDependencies(packageF: String): F[Set[String]]
 }
 
 class PacmanApiImpl[F[_]: Sync](implicit shellAccessor: ShellAccessor[F]) extends PacmanApi[F] {
@@ -35,4 +38,12 @@ class PacmanApiImpl[F[_]: Sync](implicit shellAccessor: ShellAccessor[F]) extend
     shellAccessor.execCommandYes(s"pacman -R ${packages.mkString(" ")}").void
       .whenA(packages.nonEmpty)
   }
+
+  def getDependencies(packageF: String): F[Set[String]] =
+    shellAccessor.execCommand(s"pactree -u $packageF")
+      .map(_.asPackages)
+
+  def getCodependencies(packageF: String): F[Set[String]] =
+    shellAccessor.execCommand(s"pactree -u -r $packageF")
+      .map(_.asPackages)
 }
