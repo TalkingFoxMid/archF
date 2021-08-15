@@ -26,10 +26,11 @@ class PacmanService[F[_]: MonadThrow](implicit pacmanApi: PacmanApi[F],
 
       newPackages <- pacmanConfig.getPackagesSetup
         .flatMap(_.traverse(pacmanApi.verifyPackage))
+        .flatMap(dependify)
 
       newGroupsPackages <- pacmanConfig.getGroupsSetup
         .flatMap(_.flatTraverse(pacmanApi.getPackagesInGroup))
-
+        .flatMap(dependify)
     } yield getDiffs(oldPackages, newPackages union newGroupsPackages)
 
   private def getDiffs(oldPack: Set[VerifiedPackage], newPack: Set[VerifiedPackage]): DiffPackage =
