@@ -2,6 +2,7 @@ package Funcman
 
 import Configurators.PacmanConfig
 import cats.data.Kleisli
+import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.{Applicative, FlatMap, Monad, MonadError, MonadThrow}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
@@ -12,7 +13,7 @@ import tfox.immersivecollections.instances.set._
 
 case class DiffPackage(toInstall: Set[VerifiedPackage], toRemove: Set[VerifiedPackage])
 
-class PacmanService[F[_]: MonadThrow](implicit pacmanApi: PacmanApi[F],
+class PacmanService[F[_]: Sync](implicit pacmanApi: PacmanApi[F],
                                       pacmanConfig: PacmanConfig[F]) {
   val getDependencies = Kleisli(pacmanApi.getDependencies)
   val getDependenciesSync = Kleisli(pacmanApi.getDependenciesSync)
@@ -29,7 +30,10 @@ class PacmanService[F[_]: MonadThrow](implicit pacmanApi: PacmanApi[F],
 
       newGroupsPackages <- pacmanConfig.getGroupsSetup
         .flatMap(_.flatTraverse(pacmanApi.getPackagesInGroup))
-
+      _ <- Sync[F].delay(println(oldPackages.map(_.name)))
+      _ <- Sync[F].delay(println(newPackages.map(_.name)))
+      _ <- Sync[F].delay(println(newGroupsPackages.map(_.name)))
+      _ <- Sync[F].delay(println(getDiffs(oldPackages, newPackages union newGroupsPackages)))
     } yield getDiffs(oldPackages, newPackages union newGroupsPackages)
 
   private def getDiffs(oldPack: Set[VerifiedPackage], newPack: Set[VerifiedPackage]): DiffPackage =
