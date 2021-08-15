@@ -1,5 +1,5 @@
 import Configurators.{PacmanConfig, PacmanConfigImpl}
-import Funcman.{ConfigReader, DiffPackage, PacmanApi, PacmanApiImpl, PacmanService}
+import Funcman.{DiffPackage, PacmanApi, PacmanApiImpl, PacmanService}
 import cats.effect.{ExitCode, IO, IOApp}
 import cats.syntax.traverse._
 import insfrastructure.ShellAccessor

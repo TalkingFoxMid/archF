@@ -1,5 +1,0 @@
-package Funcman
-
-class PackageConfig {
-
-}
