@@ -19,8 +19,8 @@ class PacmanService[F[_]: Monad](implicit pacmanApi: PacmanApi[F],
   def getChanges: F[DiffPackage] =
     for {
       oldPack <- pacmanApi.packageList
-      newPack <- dependify(pacmanConfig.getCustomPackages)
-      base <- dependify(pacmanConfig.getBasePackages)
+      newPack <- pacmanConfig.getCustomPackages >>= dependify
+      base <- pacmanConfig.getBasePackages >>= dependify
     } yield getDiffs(oldPack, newPack union base)
 
   private def getDiffs(oldPack: Set[String], newPack: Set[String]): F[DiffPackage] = {
