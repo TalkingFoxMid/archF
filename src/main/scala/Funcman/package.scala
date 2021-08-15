@@ -1,5 +1,7 @@
 package object Funcman {
-  case class Package(name: String)
+  trait VerifiedPackage {
+    def name: String
+  }
 
   case class FuncmanException(message: String) extends Exception
 }
