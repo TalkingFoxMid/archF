@@ -10,7 +10,7 @@ trait PacmanConfig[F[_]] {
   def getGroupsSetup: F[Set[String]]
 }
 
-class PacmanConfigImpl[F[_]: Applicative](pacmanApi: PacmanApi[F]) extends PacmanConfig[F] {
+class PacmanConfigImpl[F[_]: Applicative] extends PacmanConfig[F] {
   private val LinuxBase = Set("base", "linux", "linux-firmware")
   private val ArchFBase = Set("git", "scala", "sbt", "jdk8-openjdk", "pacman-contrib")
   private val Ethernet = Set("dhcpcd")

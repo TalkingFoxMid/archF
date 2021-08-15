@@ -14,8 +14,8 @@ import appliers.PacmanApplier
 object Apply extends IOApp {
   override def run(args: List[String]): IO[ExitCode] = {
     implicit val shellAccessor = new ShellAccessor[IO]
-    implicit val pacmanApi = new PacmanApiImpl[IO]()
-    implicit val pacmanConfig: PacmanConfig[IO] = new PacmanConfigImpl
+    implicit val pacmanApi: PacmanApiImpl[IO] = new PacmanApiImpl[IO]()
+    implicit val pacmanConfig: PacmanConfig[IO] = new PacmanConfigImpl[IO]
     implicit val pacmanService = new PacmanService[IO]
     val appliers = PacmanApplier[IO]
 

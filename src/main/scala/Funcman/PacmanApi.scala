@@ -22,9 +22,9 @@ trait PacmanApi[F[_]] {
 
   def existsSync(packageF: String): F[Boolean]
 
-  def installPackage(packages: Set[String]): F[Unit]
+  def installPackage(packages: Set[Package]): F[Unit]
 
-  def removePackage(packages: Set[String]): F[Unit]
+  def removePackage(packages: Set[Package]): F[Unit]
 
   def updateAll: F[String]
 
@@ -44,12 +44,12 @@ class PacmanApiImpl[F[_]: Sync](implicit shellAccessor: ShellAccessor[F]) extend
   def updateAll: F[String] =
     shellAccessor.execCommandYes("pacman -Syu")
 
-  def installPackage(packages: Set[String]): F[Unit] =
-    shellAccessor.execCommandYes(s"pacman -S ${packages.mkString(" ")}").void
+  def installPackage(packages: Set[Package]): F[Unit] =
+    shellAccessor.execCommandYes(s"pacman -S ${packages.map(_.name).mkString(" ")}").void
       .whenA(packages.nonEmpty)
 
-  def removePackage(packages: Set[String]): F[Unit] = {
-    shellAccessor.execCommandYes(s"pacman -R ${packages.mkString(" ")}").void
+  def removePackage(packages: Set[Package]): F[Unit] = {
+    shellAccessor.execCommandYes(s"pacman -R ${packages.map(_.name).mkString(" ")}").void
       .whenA(packages.nonEmpty)
   }
 
