@@ -1,23 +1,23 @@
-import Funcman.{ConfigReader, DiffManager, DiffPackage, PacmanApi, PacmanApiImpl}
+import Configurators.{PacmanConfig, PacmanConfigImpl}
+import Funcman.{ConfigReader, DiffPackage, PacmanApi, PacmanApiImpl, PacmanService}
 import cats.effect.{ExitCode, IO, IOApp}
 import cats.syntax.traverse._
 import insfrastructure.ShellAccessor
-
+import cats.syntax.applicative._
+import cats.syntax.traverse._
+import tfox.immersivecollections.instances.set._
 import scala.sys.process._
 
 object Apply extends IOApp {
-  override def run(args: List[String]): IO[ExitCode] =
+  override def run(args: List[String]): IO[ExitCode] = {
+    implicit val shellAccessor = new ShellAccessor[IO]
+    implicit val pacmanApi = new PacmanApiImpl[IO]()
+    implicit val pacmanConfig: PacmanConfig[IO] = new PacmanConfigImpl
+    val pacmanService = new PacmanService[IO]
     for {
-      implicit0(sa: ShellAccessor[IO]) <- IO(new ShellAccessor[IO])
-      pacmanApi = new PacmanApiImpl[IO]
-      cr = new ConfigReader[IO]
-      old <- pacmanApi.packageList
-      newPackages <- cr.getPackagesToBe
-      diffManager = new DiffManager
-      diffs <- diffManager.getDiffs(old, newPackages)
-      _ <- diffs match {
-        case DiffPackage(toInstall, toRemove) => pacmanApi.installPackage(toInstall) >>
-          pacmanApi.removePackage(toRemove)
-      }
+      DiffPackage(toInstall, toDelete) <- pacmanService.getChanges
+      _ <- pacmanApi.removePackage(toDelete)
+      _ <- pacmanApi.installPackage(toInstall)
     } yield ExitCode.Success
+  }
 }
