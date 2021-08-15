@@ -14,7 +14,7 @@ class PacmanApplier[F[_]: Monad](implicit pacmanService: PacmanService[F],
       DiffPackage(toInstall, toDelete) <- pacmanService.getChanges
       _ <- pacmanApi.removePackage(toDelete)
       _ <- pacmanApi.installPackage(toInstall)
-    } yield ExitCode.Success
+    } yield ()
 }
 object PacmanApplier {
   def apply[F[_] : Monad](implicit pacmanService: PacmanService[F], pacmanApi: PacmanApi[F]): PacmanApplier[F] = new PacmanApplier
