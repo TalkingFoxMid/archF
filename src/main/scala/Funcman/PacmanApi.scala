@@ -64,7 +64,6 @@ class PacmanApiImpl[F[_]: Sync](implicit shellAccessor: ShellAccessor[F]) extend
 
   def removePackage(packages: Set[VerifiedPackage]): F[Unit] =
     for {
-      _ <- Sync[F].delay(println(packages))
       _ <- shellAccessor.execCommandYes(s"pacman -R ${packages.map(_.name).mkString(" ")}").void
         .whenA(packages.nonEmpty)
     } yield ()
