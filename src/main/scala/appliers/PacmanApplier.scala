@@ -13,7 +13,7 @@ class PacmanApplier[F[_]: Sync](implicit pacmanService: PacmanService[F],
     for {
       _ <- pacmanApi.updateAll
       DiffPackage(toInstall, toDelete) <- pacmanService.getChanges
-//      _ <- pacmanApi.removePackage(toDelete)
+      _ <- pacmanApi.removePackage(toDelete)
 //      _ <- pacmanApi.installPackage(toInstall)
     } yield ()
 }
