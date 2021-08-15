@@ -21,6 +21,12 @@ trait PacmanApi[F[_]] {
   def getCodependencies(packageF: String): F[Set[String]]
 
   def existsSync(packageF: String): F[Boolean]
+
+  def installPackage(packages: Set[String]): F[Unit]
+
+  def removePackage(packages: Set[String]): F[Unit]
+
+  def updateAll: F[String]
 }
 
 class PacmanApiImpl[F[_]: Sync](implicit shellAccessor: ShellAccessor[F]) extends PacmanApi[F] {
@@ -52,7 +58,7 @@ class PacmanApiImpl[F[_]: Sync](implicit shellAccessor: ShellAccessor[F]) extend
   def getDependenciesSync(packageF: String): F[Set[String]]=
     shellAccessor.execCommand(s"pactree -u -s $packageF")
       .map(_.asPackages)
-  
+
   def getCodependencies(packageF: String): F[Set[String]] =
     shellAccessor.execCommand(s"pactree -u -r $packageF")
       .map(_.asPackages)
