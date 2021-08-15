@@ -62,10 +62,12 @@ class PacmanApiImpl[F[_]: Sync](implicit shellAccessor: ShellAccessor[F]) extend
     shellAccessor.execCommandYes(s"pacman -S ${packages.map(_.name).mkString(" ")}").void
       .whenA(packages.nonEmpty)
 
-  def removePackage(packages: Set[VerifiedPackage]): F[Unit] = {
-    shellAccessor.execCommandYes(s"pacman -R ${packages.map(_.name).mkString(" ")}").void
-      .whenA(packages.nonEmpty)
-  }
+  def removePackage(packages: Set[VerifiedPackage]): F[Unit] =
+    for {
+      _ <- Sync[F].delay(println(packages))
+      _ <- shellAccessor.execCommandYes(s"pacman -R ${packages.map(_.name).mkString(" ")}").void
+        .whenA(packages.nonEmpty)
+    } yield ()
 
   def getDependencies(packageF: VerifiedPackage): F[Set[VerifiedPackage]] =
     shellAccessor.execCommand(s"pactree -u ${packageF.name}")
