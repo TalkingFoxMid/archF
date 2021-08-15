@@ -40,11 +40,12 @@ class PacmanApiImpl[F[_]: Sync](implicit shellAccessor: ShellAccessor[F]) extend
   private case class VerifiedPackageImpl(name: String) extends VerifiedPackage
 
   def verifyPackage(name: String): F[VerifiedPackage] =
-    for {
-      exists <- existsSync(name)
-      _ <- MonadError[F, Throwable].raiseError(PackageVerifyException(name))
-        .whenA(!exists)
-    } yield VerifiedPackageImpl(name)
+    Sync[F].delay(VerifiedPackageImpl(name))
+//    for {
+//      exists <- existsSync(name)
+//      _ <- MonadError[F, Throwable].raiseError(PackageVerifyException(name))
+//        .whenA(!exists)
+//    } yield VerifiedPackageImpl(name)
 
   override def packageList: F[Set[VerifiedPackage]] =
     for {
