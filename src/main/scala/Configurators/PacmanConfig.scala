@@ -11,7 +11,7 @@ trait PacmanConfig[F[_]] {
 
 class PacmanConfigImpl[F[_]: Applicative] extends PacmanConfig[F] {
   private val LinuxBase = Set("base", "linux", "linux-firmware")
-  private val ArchFBase = Set("git", "scala", "sbt", "jdk8-openjdk")
+  private val ArchFBase = Set("git", "scala", "sbt", "jdk8-openjdk", "pacman-contrib")
   private val Ethernet = Set("dhcpcd")
   private val MyPackages = Set("vim", "chromium")
 
