@@ -23,7 +23,6 @@ class PacmanService[F[_]: Monad](implicit pacmanApi: PacmanApi[F],
       base <- pacmanConfig.getBasePackages >>= dependify
     } yield getDiffs(oldPack, newPack union base)
 
-  private def getDiffs(oldPack: Set[String], newPack: Set[String]): F[DiffPackage] = {
-    DiffPackage(newPack -- oldPack, oldPack -- newPack).pure[F]
-  }
+  private def getDiffs(oldPack: Set[String], newPack: Set[String]): DiffPackage =
+    DiffPackage(newPack -- oldPack, oldPack -- newPack)
 }
