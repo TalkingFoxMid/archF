@@ -2,8 +2,7 @@ package Funcman
 
 import Configurators.PacmanConfig
 import cats.data.Kleisli
-import cats.{Applicative, FlatMap, Monad, MonadThrow}
-import cats.effect.IO
+import cats.{Applicative, FlatMap, Monad, MonadError, MonadThrow}
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.applicative._
@@ -11,23 +10,29 @@ import cats.syntax.traverse._
 import cats.syntax.applicativeError._
 import tfox.immersivecollections.instances.set._
 
-case class DiffPackage(toInstall: Set[String], toRemove: Set[String])
+case class DiffPackage(toInstall: Set[VerifiedPackage], toRemove: Set[VerifiedPackage])
 
 class PacmanService[F[_]: MonadThrow](implicit pacmanApi: PacmanApi[F],
                                       pacmanConfig: PacmanConfig[F]) {
   val getDependencies = Kleisli(pacmanApi.getDependencies)
   val getDependenciesSync = Kleisli(pacmanApi.getDependenciesSync)
 
-  def dependify(packageList: Set[String]): F[Set[String]] =
+  def dependify(packageList: Set[VerifiedPackage]): F[Set[VerifiedPackage]] =
     packageList.flatTraverse(getDependencies.handleErrorWith(_ => getDependenciesSync).run)
 
   def getChanges: F[DiffPackage] =
     for {
-      oldPack <- pacmanApi.packageList
-      newPack <- pacmanConfig.getCustomPackages >>= dependify
-      base <- pacmanConfig.getBasePackages >>= dependify
-    } yield getDiffs(oldPack, newPack union base)
+      oldPackages <- pacmanApi.packageList
 
-  private def getDiffs(oldPack: Set[String], newPack: Set[String]): DiffPackage =
+      newPackages <- pacmanConfig.getPackagesSetup
+        .flatMap(_.traverse(pacmanApi.verifyPackage))
+        .flatMap(dependify)
+
+      newGroupsPackages <- pacmanConfig.getGroupsSetup
+        .flatMap(_.flatTraverse(pacmanApi.getPackagesInGroup))
+        .flatMap(dependify)
+    } yield getDiffs(oldPackages, newPackages union newGroupsPackages)
+
+  private def getDiffs(oldPack: Set[VerifiedPackage], newPack: Set[VerifiedPackage]): DiffPackage =
     DiffPackage(newPack -- oldPack, oldPack -- newPack)
 }
