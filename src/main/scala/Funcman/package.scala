@@ -1,5 +1,8 @@
 package object Funcman {
-  trait VerifiedPackage {
+  trait PacmanPackage {
+    def name: String
+  }
+  trait AurPackage {
     def name: String
   }
 

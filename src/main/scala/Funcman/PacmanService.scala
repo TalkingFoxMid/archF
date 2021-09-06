@@ -10,14 +10,14 @@ import cats.syntax.traverse._
 import cats.syntax.applicativeError._
 import tfox.immersivecollections.instances.set._
 
-case class DiffPackage(toInstall: Set[VerifiedPackage], toRemove: Set[VerifiedPackage])
+case class DiffPackage(toInstall: Set[PacmanPackage], toRemove: Set[PacmanPackage])
 
 class PacmanService[F[_]: MonadThrow](implicit pacmanApi: PacmanApi[F],
                                       pacmanConfig: PacmanConfig[F]) {
   val getDependencies = Kleisli(pacmanApi.getDependencies)
   val getDependenciesSync = Kleisli(pacmanApi.getDependenciesSync)
 
-  def dependify(packageList: Set[VerifiedPackage]): F[Set[VerifiedPackage]] =
+  def dependify(packageList: Set[PacmanPackage]): F[Set[PacmanPackage]] =
     packageList.flatTraverse(getDependencies.handleErrorWith(_ => getDependenciesSync).run)
 
   def getChanges: F[DiffPackage] =
@@ -33,6 +33,6 @@ class PacmanService[F[_]: MonadThrow](implicit pacmanApi: PacmanApi[F],
         .flatMap(dependify)
     } yield getDiffs(oldPackages, newPackages union newGroupsPackages)
 
-  private def getDiffs(oldPack: Set[VerifiedPackage], newPack: Set[VerifiedPackage]): DiffPackage =
+  private def getDiffs(oldPack: Set[PacmanPackage], newPack: Set[PacmanPackage]): DiffPackage =
     DiffPackage(newPack -- oldPack, oldPack -- newPack)
 }
