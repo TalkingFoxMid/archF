@@ -1,8 +1,7 @@
-package appliers
+package Funcman
 
-import Funcman.{DiffPackage, PacmanApi, PacmanService}
+import appliers.Applier
 import cats.Monad
-import cats.effect.ExitCode
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 
